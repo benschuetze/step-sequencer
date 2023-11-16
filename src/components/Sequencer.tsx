@@ -3,15 +3,12 @@ import { supabase } from "../../supabase.tsx";
 import { getSignedUrlsResponses } from "../services/db.tsx";
 import { getAudioBuffers } from "../services/audio.tsx";
 
+//types
+import { SignedUrlInfo } from "../types/audio";
+
 type SequencerProps = {
   bpm: number;
 };
-
-interface SignedUrlInfo {
-  name: string;
-  signedUrl: string;
-  error: boolean;
-}
 
 const getSamples = async () => {
   try {
@@ -43,7 +40,9 @@ const Sequencer = ({ bpm }: SequencerProps) => {
   const [activatedSteps, setActivatedSteps] = useState<Array<number>>([]);
   const [currentActiveStep, setCurrentActiveStep] = useState<number>(0);
   const [playerAction, setPlayerAction] = useState<string>("Start");
-  const [timeoutId, setTimeoutId] = useState<number | undefined>(undefined);
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | undefined>(
+    undefined
+  );
   const [isFirstRender, setIsFirstRender] = useState(true);
 
   const playSequence = (bpmChangeWhilePlaying = false) => {

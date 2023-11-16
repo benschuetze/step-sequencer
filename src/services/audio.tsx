@@ -1,10 +1,6 @@
-const audiocontext = new AudioContext();
+import { SignedUrlInfo } from "../types/audio";
 
-interface SignedUrlInfo {
-  name: string;
-  signedUrl: string;
-  error: boolean;
-}
+const audiocontext = new AudioContext();
 
 export const getAudioBuffers = async (signedUrls: Array<SignedUrlInfo>) => {
   const loadAudio = async (url: string) => {

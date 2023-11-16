@@ -1,13 +1,8 @@
 import { supabase } from "../../supabase";
-
-interface SignedUrlInfo {
-  name: string;
-  signedUrl: string;
-  error: boolean;
-}
+import { SignedUrlInfo } from "../types/audio";
 
 export const getSignedUrlsResponses = (data) => {
-  const signedUrlsResponses = data.map(async (sample) => {
+  const signedUrlsResponses = data.map(async (sample: { name: string }) => {
     const { data: urlData, error: signError } = await supabase.storage
       .from("kicks")
       .createSignedUrl(sample.name, 60);
