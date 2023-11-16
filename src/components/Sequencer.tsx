@@ -5,10 +5,18 @@ type SequencerProps = {
   bpm: number;
 };
 
+interface SignedUrlInfo {
+  name: string;
+  signedUrl: string;
+  error: boolean;
+}
+
 const API_KEY = import.meta.env.VITE_SUPABASE_API_KEY;
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_PROJECT_URL;
 
 const supabase = createClient(SUPABASE_URL, API_KEY);
+
+const audiocontext = new AudioContext();
 
 const getSamples = async () => {
   try {
@@ -16,29 +24,62 @@ const getSamples = async () => {
     if (error) {
       console.error("Error fetching bucket content:", error.message);
     } else {
+      // get signed urls for all audio files
       const signedUrlsResponses = data.map(async (sample) => {
         const { data: urlData, error: signError } = await supabase.storage
           .from("kicks")
           .createSignedUrl(sample.name, 60);
+
+        let signedUrlData: SignedUrlInfo;
+
         if (signError) {
+          signedUrlData = {
+            name: "",
+            signedUrl: "",
+            error: true,
+          };
+
           console.error(
             `Error creating signed URL for ${sample.name}:`,
             signError.message
           );
-          return null;
+
+          return signedUrlData;
         } else {
-          return { name: sample.name, signedUrl: urlData.signedUrl };
+          signedUrlData = {
+            name: sample.name || "",
+            signedUrl: urlData.signedUrl || "",
+            error: false,
+          };
+
+          return signedUrlData;
         }
       });
-      const signedUrls = await Promise.all(signedUrlsResponses);
+      const signedUrls: Array<SignedUrlInfo> = await Promise.all(
+        signedUrlsResponses
+      );
+
+      // create audio buffers for all samples
+      const loadAudio = async (url: string) => {
+        const response = await fetch(url);
+        const arrayBuffer = await response.arrayBuffer();
+        return audiocontext.decodeAudioData(arrayBuffer);
+      };
+      const loadAllAudio = async (urls: Array<SignedUrlInfo>) => {
+        const audioBuffers = await Promise.all(
+          urls.map((urlObj) => loadAudio(urlObj.signedUrl))
+        );
+        return audioBuffers;
+      };
+
+      const audioBuffers = await loadAllAudio(signedUrls);
+
       console.log("SIGNED URLSSS: ", signedUrls);
     }
   } catch (e) {
     console.error("SUPABASE ERROR: ", e);
   }
 };
-
-const Audiocontext = new AudioContext();
 
 const Sequencer = ({ bpm }: SequencerProps) => {
   const [steps, setSteps] = useState<Array<number>>([
