@@ -1,5 +1,7 @@
-export type SignedUrlInfo = {
-  name: string;
-  signedUrl: string;
-  error: boolean;
-};
+export type AudioInfo = {
+  name: string
+  signedUrl: string
+  error: boolean
+  buffer: AudioBuffer | null
+  source?: AudioBufferSourceNode
+}

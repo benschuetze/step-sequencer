@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../supabase.tsx'
 import { getSignedUrlsResponses } from '../services/db.tsx'
-import { getAudioBuffers } from '../services/audio.tsx'
+import { getCompleteAudioInfo } from '../services/audio.tsx'
 
 //types
-import { SignedUrlInfo } from '../types/audio'
+import { AudioInfo } from '../types/audio'
 
 type SequencerProps = {
   bpm: number
@@ -26,16 +26,12 @@ const Sequencer = ({ bpm }: SequencerProps) => {
       if (error) {
         console.error('Error fetching bucket content:', error.message)
       } else {
-        // get signed urls for all audio files
         const signedUrlsResponses = getSignedUrlsResponses(data)
-        const signedUrls: Array<SignedUrlInfo> = await Promise.all(signedUrlsResponses)
+        const signedUrls: Array<AudioInfo> = await Promise.all(signedUrlsResponses)
 
-        const buffers = await getAudioBuffers(signedUrls)
+        const completeAudioInfo = await getCompleteAudioInfo(signedUrls)
 
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        setAudioBuffers((_prevAudioBuffers) => audioBuffers)
-
-        console.log('AUDIO BUFFERS CREATED: ', buffers)
+        console.log('COMPLETE AUDIO INFO: ', completeAudioInfo)
       }
     } catch (e) {
       console.error('SUPABASE ERROR: ', e)
@@ -95,8 +91,6 @@ const Sequencer = ({ bpm }: SequencerProps) => {
   useEffect(() => {
     getSamples()
   }, [])
-
-  useEffect(() => {}, [audioBuffers])
 
   return (
     <>

@@ -1,36 +1,31 @@
-import { supabase } from "../../supabase";
-import { SignedUrlInfo } from "../types/audio";
+import { supabase } from '../../supabase'
+import { AudioInfo } from '../types/audio'
 
 export const getSignedUrlsResponses = (data) => {
   const signedUrlsResponses = data.map(async (sample: { name: string }) => {
-    const { data: urlData, error: signError } = await supabase.storage
-      .from("kicks")
-      .createSignedUrl(sample.name, 60);
+    const { data: urlData, error: signError } = await supabase.storage.from('kicks').createSignedUrl(sample.name, 60)
 
-    let signedUrlData: SignedUrlInfo;
+    let signedUrlData: AudioInfo
 
     if (signError) {
       signedUrlData = {
-        name: "",
-        signedUrl: "",
+        name: '',
+        signedUrl: '',
         error: true,
-      };
+      }
 
-      console.error(
-        `Error creating signed URL for ${sample.name}:`,
-        signError.message
-      );
+      console.error(`Error creating signed URL for ${sample.name}:`, signError.message)
 
-      return signedUrlData;
+      return signedUrlData
     } else {
       signedUrlData = {
-        name: sample.name || "",
-        signedUrl: urlData.signedUrl || "",
+        name: sample.name || '',
+        signedUrl: urlData.signedUrl || '',
         error: false,
-      };
+      }
 
-      return signedUrlData;
+      return signedUrlData
     }
-  });
-  return signedUrlsResponses;
-};
+  })
+  return signedUrlsResponses
+}
