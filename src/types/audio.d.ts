@@ -4,4 +4,7 @@ export type AudioInfo = {
   error: boolean
   buffer: AudioBuffer | null
   source?: AudioBufferSourceNode
+  step: number
+  activated?: boolean
+  hasPlayed?: boolean
 }
